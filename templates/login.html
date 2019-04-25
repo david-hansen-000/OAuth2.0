@@ -2,7 +2,7 @@
 <html>
 <head>
   <script src="https://apis.google.com/js/platform.js" async defer></script>
-  <meta name="google-signin-client_id" content="920414729987-2529gvo4v5k056qd3b02rdsatvvde5nf.apps.googleusercontent.com">
+  <meta name="google-signin-client_id" content="YOUR_OWN_ID.apps.googleusercontent.com">
 </head>
 <body>
 
@@ -18,12 +18,6 @@
     }
   
   function onSignIn(googleUser) {
-    var profile = googleUser.getBasicProfile();
-
-    console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-    console.log('Name: ' + profile.getName());
-    console.log('Image URL: ' + profile.getImageUrl());
-    console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
     var id_token = googleUser.getAuthResponse().id_token;
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/tokensignin');
@@ -32,13 +26,6 @@
       console.log('Signed in as: ' + xhr.responseText);
     };
     xhr.send('idtoken=' + id_token);
-  }
-
-  function signInCallback(authResult) {
-    console.log('we have callback');
-    if (authResult['code']) {
-      console.log('and authorization')
-    }
   }
   </script>
 </body>

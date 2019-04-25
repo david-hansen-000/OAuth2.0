@@ -5,6 +5,7 @@ from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem
 
+import requests as req
 from flask import session as login_session
 import random, string
 
@@ -12,8 +13,9 @@ import json
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
-CLIENT_ID = json.loads(
-    open('client_secrets.json', 'r').read())['web']['client_id']
+CLIENT_ID = "YOU_OWN_ID.apps.googleusercontent.com"
+#CLIENT_ID = json.loads(
+#    open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Restaurant Menu Application"
 
 #Connect to Database and create database session
@@ -28,22 +30,30 @@ app.secret_key = 'super_secret_key'
 @app.route('/login')
 def showLogin():
     state = ''.join(random.choice(string.ascii_uppercase +\
-            string.digits) for x in range(32))
-    print(f"state:{state}")
+             string.digits) for x in range(32))
+    # print(f"state:{state}")
     login_session['state'] = state
-    return render_template('login.html', STATE=state)
+    return render_template('login.html')
 
 
-@app.route('/gconnect', methods=['POST'])
-def gconnect(token):
+@app.route('/tokensignin', methods=['POST'])
+def gconnect():
+    token = request.form['idtoken']
+    print(f"we got the token: {token}")
+    userid = "unset"
+    #resp = req.get(f"https://oauth2.googleapis.com/tokeninfo?id_token={token}")
+    #print(f"text:{resp.text}")
     try:
         idinfo = id_token.verify_oauth2_token(token, requests.Request())
-        if idinfo['iss'] not in ['acounts.google.com', 'https://accounts.google.com']:
-            raise ValueError('Wrong issuer.')
+        if idinfo['aud'] not in [CLIENT_ID]:
+            raise ValueError('Could not verify audience.')
 
         userid = idinfo['sub']
-    except ValueError:
-        pass
+        print(f"userid is:{userid}")
+    except ValueError as e:
+        print("value error")
+    return userid
+
 
 #JSON APIs to view Restaurant Information
 @app.route('/restaurant/<int:restaurant_id>/menu/JSON')
